@@ -1,0 +1,18 @@
+{
+  "name": "pokemon-server",
+  "version": "1.0.0",
+  "description": "pokemon server for the pokemon api",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tristan Mikiewicz 20011173",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongodb": "^7.0.0",
+    "redis": "^5.9.0"
+  }
+}
