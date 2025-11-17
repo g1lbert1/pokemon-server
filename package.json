@@ -11,8 +11,10 @@
   "author": "Tristan Mikiewicz 20011173",
   "license": "ISC",
   "dependencies": {
+    "@apollo/server": "^5.1.0",
+    "axios": "^1.13.2",
     "express": "^5.1.0",
-    "mongodb": "^7.0.0",
+    "graphql": "^16.12.0",
     "redis": "^5.9.0"
   }
 }
