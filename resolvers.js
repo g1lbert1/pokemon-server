@@ -9,10 +9,10 @@ export const resolvers = {
       const pagenum = args.page
       const total = 1328
       const limit = 20
-      const offset = (pagenum - 1) * limit
+      const offset = (pagenum) * limit
       const maxPage = Math.ceil(total / limit) // 67
 
-      if(pagenum < 1 || pagenum > maxPage || !Number.isInteger(pagenum)){
+      if(pagenum < 0 || pagenum > maxPage || !Number.isInteger(pagenum)){
         throw new GraphQLError(`Invalid page number`, {
           extensions: {code: 'BAD_USER_INPUT'}
         })
