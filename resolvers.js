@@ -7,7 +7,12 @@ export const resolvers = {
     getPokemons: async (_, args) => {
       //make sure page is a valid number
       const pagenum = args.page
-      if(pagenum < 0 || !Number.isInteger(pagenum)){
+      const total = 1328
+      const limit = 20
+      const offset = (pagenum - 1) * limit
+      const maxPage = Math.ceil(total / limit) // 67
+
+      if(pagenum < 1 || pagenum > maxPage || !Number.isInteger(pagenum)){
         throw new GraphQLError(`Invalid page number`, {
           extensions: {code: 'BAD_USER_INPUT'}
         })
@@ -21,8 +26,7 @@ export const resolvers = {
       }
       
       //query the api
-      const limit = 20
-      const offset = (pagenum - 1) * limit
+   
       const { data } = await axios.get(
         `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
       )
@@ -39,6 +43,7 @@ export const resolvers = {
       )
       //store data in cache, expires in one hour
       await client.set(cacheKey, JSON.stringify(results), { EX: 3600 })
+      return results
     },
 
     getPokemonById: async (_, args) => {
@@ -51,7 +56,10 @@ export const resolvers = {
       //check cache
       const cacheKey = `pokemon_${pokeid}`
       const cached = await client.get(cacheKey)
-      if(cached) return JSON.parse(cached)
+      if(cached){
+         console.log(`Returning cached data for id ${pokeid}`)
+        return JSON.parse(cached)
+      } 
 
       try{
         const { data } = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokeid}`)

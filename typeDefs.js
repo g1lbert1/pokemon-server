@@ -10,7 +10,7 @@ export const typeDefs = `#graphql
 
   type Pokemon {
     name: String!
-    image: String!
+    image: String
     types: [String!]!
   
   }
