@@ -7,12 +7,10 @@ export const resolvers = {
     getPokemons: async (_, args) => {
       //make sure page is a valid number
       const pagenum = args.page
-      const total = 1328
       const limit = 20
       const offset = pagenum * limit //=== 0 when pagenum = 0
-      const maxPage = Math.ceil(total / limit) - 1
 
-      if(pagenum < 0 || pagenum > maxPage || !Number.isInteger(pagenum)){
+      if(pagenum < 0 || !Number.isInteger(pagenum)){
         throw new GraphQLError(`Invalid page number`, {
           extensions: {code: 'BAD_USER_INPUT'}
         })
@@ -30,10 +28,20 @@ export const resolvers = {
       const { data } = await axios.get(
         `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
       )
+      //total number of pokemon that the api will return
+      const total = data.count
+      //max number of pages based on limit=20
+      const maxPage = Math.ceil(total / limit) - 1
+      // if(pagenum > maxPage){
+      //   throw new GraphQLError(`Error 404: Invalid Page`, {
+      //     extensions: {code: 'BAD_USER_INPUT'}
+      //   })
+      // }
 
       if(!data.results || data.results.length === 0){
-        await client.set(cacheKey, JSON.stringify([]), { EX: 3600 })
-        return []
+        throw new GraphQLError(`Error 404: Page not Found`, {
+          extensions: {code: 'NOT_FOUND'}
+        })
       }
 
       const results = await Promise.all(
@@ -43,12 +51,16 @@ export const resolvers = {
             name: detail.data.name,
             image: detail.data.sprites.front_default,
             types: detail.data.types.map((t) => t.type.name),
+            //extracting id from url ex: "https://pokeapi.co/api/v2/pokemon/1/"
+            id: Number(pokemon.url.split("/").filter(Boolean).pop()) 
           }
         })
       )
+      //building PokemonsPage
+      const response = {pokemons: results, maxPage}
       //store data in cache, expires in one hour
-      await client.set(cacheKey, JSON.stringify(results), { EX: 3600 })
-      return results
+      await client.set(cacheKey, JSON.stringify(response), { EX: 3600 })
+      return response
     },
 
     getPokemonById: async (_, args) => {
@@ -76,7 +88,7 @@ export const resolvers = {
         await client.set(cacheKey, JSON.stringify(formatted), { EX: 3600 })
         return formatted
       }catch(e){
-        throw new GraphQLError(`Pokemon not found`, {
+        throw new GraphQLError(`Error 404: Pokemon not found`, {
           extensions: {code: 'NOT_FOUND'}
         })
       }

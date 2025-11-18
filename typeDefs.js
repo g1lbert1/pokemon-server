@@ -2,7 +2,7 @@
 
 export const typeDefs = `#graphql
   type Query {
-    getPokemons(page: Int!): [Pokemon]
+    getPokemons(page: Int!): PokemonPage
     
     getPokemonById(id: Int!): Pokemon
 
@@ -12,7 +12,13 @@ export const typeDefs = `#graphql
     name: String!
     image: String
     types: [String!]!
+    id: Int!
   
+  }
+
+  type PokemonPage {
+    pokemons: [Pokemon]
+    maxPage: Int!
   }
 
 `;
