@@ -9,8 +9,8 @@ export const resolvers = {
       const pagenum = args.page
       const total = 1328
       const limit = 20
-      const offset = (pagenum) * limit
-      const maxPage = Math.ceil(total / limit) // 67
+      const offset = pagenum * limit //=== 0 when pagenum = 0
+      const maxPage = Math.ceil(total / limit) - 1
 
       if(pagenum < 0 || pagenum > maxPage || !Number.isInteger(pagenum)){
         throw new GraphQLError(`Invalid page number`, {
@@ -30,6 +30,11 @@ export const resolvers = {
       const { data } = await axios.get(
         `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
       )
+
+      if(!data.results || data.results.length === 0){
+        await client.set(cacheKey, JSON.stringify([]), { EX: 3600 })
+        return []
+      }
 
       const results = await Promise.all(
         data.results.map(async (pokemon) => {
